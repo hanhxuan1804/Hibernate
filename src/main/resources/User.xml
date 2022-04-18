@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 version="3.0">
+
+    <entity class="entity.User">
+        <table name="user" schema="qlhs" catalog=""/>
+        <attributes>
+            <id name="id">
+                <column name="id"/>
+            </id>
+            <basic name="username">
+                <column name="username"/>
+            </basic>
+            <basic name="email">
+                <column name="email"/>
+            </basic>
+            <basic name="password">
+                <column name="password"/>
+            </basic>
+            <basic name="type">
+                <column name="type"/>
+            </basic>
+            <basic name="createTime">
+                <column name="create_time"/>
+            </basic>
+        </attributes>
+    </entity>
+</entity-mappings>

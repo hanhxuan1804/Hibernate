@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 version="3.0">
+
+    <entity class="entity.Sinhvienmonhoc">
+        <table name="sinhvienmonhoc" schema="qlhs" catalog=""/>
+        <id-class class="entity.SinhvienmonhocPK"/>
+        <attributes>
+            <id name="maMonHoc">
+                <column name="MaMonHoc"/>
+            </id>
+            <id name="maSinhVien">
+                <column name="MaSinhVien"/>
+            </id>
+        </attributes>
+    </entity>
+</entity-mappings>

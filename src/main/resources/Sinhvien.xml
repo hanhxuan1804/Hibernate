@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 version="3.0">
+
+    <entity class="entity.Sinhvien">
+        <table name="sinhvien" schema="qlhs" catalog=""/>
+        <attributes>
+            <id name="maSinhVien">
+                <column name="MaSinhVien"/>
+            </id>
+            <basic name="hoTen">
+                <column name="HoTen"/>
+            </basic>
+            <basic name="email">
+                <column name="Email"/>
+            </basic>
+            <basic name="ngaySinh">
+                <column name="NgaySinh"/>
+            </basic>
+        </attributes>
+    </entity>
+</entity-mappings>
