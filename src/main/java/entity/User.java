@@ -1,9 +1,15 @@
 package entity;
 
+import javax.naming.directory.SearchResult;
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.metamodel.Metamodel;
+import java.awt.print.Book;
 import java.sql.Timestamp;
+import java.util.Map;
 
 @Entity
+@NamedQuery(name ="UserByUsername", query = "SELECT u FROM User u WHERE u.username = ?1 ")
 public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -72,4 +78,5 @@ public class User {
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
+
 }

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="LoginWindow">
+  <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="400" height="600"/>
+    </constraints>
+    <properties>
+      <autoscrolls value="false"/>
+      <background color="-3343105"/>
+      <maximumSize width="400" height="600"/>
+      <minimumSize width="400" height="600"/>
+      <opaque value="false"/>
+      <preferredSize width="400" height="600"/>
+    </properties>
+    <border type="bevel-lowered"/>
+    <children>
+      <component id="3d753" class="javax.swing.JLabel">
+        <constraints border-constraint="First"/>
+        <properties>
+          <horizontalAlignment value="0"/>
+          <preferredSize width="27" height="200"/>
+          <text value="App"/>
+        </properties>
+      </component>
+      <grid id="a2707" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <opaque value="false"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <grid id="c1c6c" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+            <constraints border-constraint="First"/>
+            <properties>
+              <opaque value="false"/>
+              <preferredSize width="268" height="40"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="afce8" class="javax.swing.JLabel">
+                <constraints/>
+                <properties>
+                  <text value="Username"/>
+                </properties>
+              </component>
+              <component id="8f641" class="javax.swing.JTextField" binding="usernameField">
+                <constraints/>
+                <properties>
+                  <preferredSize width="200" height="30"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="739af" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <preferredSize width="266" height="10"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="df9c1" class="javax.swing.JLabel">
+                <constraints/>
+                <properties>
+                  <text value="Password"/>
+                </properties>
+              </component>
+              <component id="28f4b" class="javax.swing.JPasswordField" binding="passwordField">
+                <constraints/>
+                <properties>
+                  <preferredSize width="200" height="30"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="29e4c" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="Last"/>
+        <properties>
+          <preferredSize width="24" height="300"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="6311e" class="javax.swing.JButton" binding="btnLogin">
+            <constraints/>
+            <properties>
+              <text value="Login"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>
