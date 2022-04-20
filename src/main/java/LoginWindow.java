@@ -15,6 +15,7 @@ public class LoginWindow {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton btnLogin;
+    private JPanel panelLoading;
     private static JFrame frame;
 
     public LoginWindow(){
@@ -33,6 +34,8 @@ public class LoginWindow {
 
                 }
                 else{
+                    //TODO: kiểm tra học sinh hay giáo vụ
+                    // Nếu học sinh đăng nhập lần đầu thì phải đổi mật khẩu
                         frame.dispose();
                         MainApp.run();
                 }
