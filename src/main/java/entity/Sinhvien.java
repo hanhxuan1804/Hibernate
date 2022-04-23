@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.sql.Date;
 
 @Entity
+@NamedQuery(name ="ListSinhVien", query = "SELECT u FROM Sinhvien u")
 public class Sinhvien {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

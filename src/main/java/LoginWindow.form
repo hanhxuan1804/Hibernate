@@ -7,6 +7,7 @@
     <properties>
       <autoscrolls value="false"/>
       <background color="-3343105"/>
+      <inheritsPopupMenu value="false"/>
       <maximumSize width="400" height="600"/>
       <minimumSize width="400" height="600"/>
       <opaque value="false"/>
@@ -81,7 +82,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="6311e" class="javax.swing.JButton" binding="btnLogin">
+          <component id="cf867" class="javax.swing.JButton" binding="loginButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="Login"/>

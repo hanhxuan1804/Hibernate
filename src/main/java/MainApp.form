@@ -11,7 +11,7 @@
     </properties>
     <border type="line"/>
     <children>
-      <grid id="c6ee" layout-manager="GridLayoutManager" row-count="5" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="c6ee" layout-manager="GridLayoutManager" row-count="5" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints border-constraint="West"/>
         <properties/>
@@ -19,7 +19,7 @@
         <children>
           <component id="22267" class="javax.swing.JButton" binding="btnTaoMonHoc">
             <constraints>
-              <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Tạo môn học"/>
@@ -27,7 +27,7 @@
           </component>
           <component id="ac3c7" class="javax.swing.JButton" binding="btnQuanLy">
             <constraints>
-              <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="2" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Quản lý môn học"/>
@@ -35,7 +35,7 @@
           </component>
           <component id="e0597" class="javax.swing.JButton" binding="btnXemDiemDanh">
             <constraints>
-              <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Xem kết quả điểm danh"/>
@@ -43,27 +43,27 @@
           </component>
           <vspacer id="a6e75">
             <constraints>
-              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <vspacer id="db99f">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <hspacer id="5d5a0">
             <constraints>
-              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
           <hspacer id="5c57f">
             <constraints>
-              <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
           <hspacer id="53495">
             <constraints>
-              <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
           <hspacer id="7b00d">
@@ -146,6 +146,7 @@
                   </grid>
                 </constraints>
                 <properties>
+                  <layoutOrientation value="1"/>
                   <model/>
                 </properties>
               </component>
@@ -235,32 +236,139 @@
               </hspacer>
             </children>
           </grid>
-          <grid id="642f7" binding="panelcard2" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+          <grid id="642f7" binding="panelcard2" layout-manager="BorderLayout" hgap="0" vgap="0">
             <constraints>
               <card name="Card2"/>
             </constraints>
             <properties/>
             <border type="none"/>
             <children>
-              <component id="c3556" class="javax.swing.JRadioButton" binding="radioButton1" default-binding="true">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="RadioButton"/>
-                </properties>
-              </component>
-              <hspacer id="a1d75">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
-              <vspacer id="33f66">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </vspacer>
+              <grid id="f460d" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+                <constraints border-constraint="First"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="3ad0f" class="javax.swing.JLabel">
+                    <constraints/>
+                    <properties>
+                      <text value="Môn học: "/>
+                    </properties>
+                  </component>
+                  <component id="1f2db" class="javax.swing.JComboBox" binding="comboBoxMonHoc">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                  <component id="65e48" class="javax.swing.JLabel">
+                    <constraints/>
+                    <properties>
+                      <text value="Phương thức:"/>
+                    </properties>
+                  </component>
+                  <component id="ada2" class="javax.swing.JComboBox" binding="comboBoxPhuongThuc" custom-create="true">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </grid>
+              <grid id="d31" binding="panelQLHSCard" layout-manager="CardLayout" hgap="0" vgap="0">
+                <constraints border-constraint="Center"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="9f177" binding="cardCheck" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <card name="Card1"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <grid id="9da9c" layout-manager="BorderLayout" hgap="0" vgap="0">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="6dead" class="javax.swing.JList" binding="listSinhVien" custom-create="true">
+                            <constraints border-constraint="Center"/>
+                            <properties>
+                              <layoutOrientation value="1"/>
+                            </properties>
+                          </component>
+                          <grid id="dec9" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+                            <constraints border-constraint="Last"/>
+                            <properties/>
+                            <border type="none"/>
+                            <children>
+                              <component id="95a4b" class="javax.swing.JButton" binding="btnThemDSSV">
+                                <constraints/>
+                                <properties>
+                                  <horizontalTextPosition value="0"/>
+                                  <text value="Thêm"/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <component id="53254" class="javax.swing.JLabel">
+                            <constraints border-constraint="West"/>
+                            <properties>
+                              <text value="                                 "/>
+                            </properties>
+                          </component>
+                          <component id="8ce91" class="javax.swing.JLabel">
+                            <constraints border-constraint="East"/>
+                            <properties>
+                              <text value="                                "/>
+                            </properties>
+                          </component>
+                        </children>
+                      </grid>
+                    </children>
+                  </grid>
+                  <grid id="2aabd" binding="cardAdd" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <card name="Card2"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="81e0f" class="javax.swing.JCheckBox" binding="checkBox1" default-binding="true">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="CheckBox"/>
+                        </properties>
+                      </component>
+                      <vspacer id="c2c87">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </vspacer>
+                    </children>
+                  </grid>
+                  <grid id="669eb" binding="cardImport" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <card name="Card3"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="cd8c" class="javax.swing.JCheckBox" binding="checkBox2" default-binding="true">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="CheckBox"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </grid>
             </children>
           </grid>
         </children>

@@ -3,6 +3,7 @@ package entity;
 import javax.persistence.*;
 
 @Entity
+@NamedQuery(name ="ListMonHoc", query = "SELECT u FROM Monhoc u")
 public class Monhoc {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
