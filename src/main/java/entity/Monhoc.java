@@ -11,9 +11,6 @@ public class Monhoc {
     @Basic
     @Column(name = "TenMonHoc")
     private String tenMonHoc;
-    @Basic
-    @Column(name = "ThoiKhoaBieu")
-    private String thoiKhoaBieu;
 
     public String getMaMonHoc() {
         return maMonHoc;
@@ -29,13 +26,5 @@ public class Monhoc {
 
     public void setTenMonHoc(String tenMonHoc) {
         this.tenMonHoc = tenMonHoc;
-    }
-
-    public String getThoiKhoaBieu() {
-        return thoiKhoaBieu;
-    }
-
-    public void setThoiKhoaBieu(String thoiKhoaBieu) {
-        this.thoiKhoaBieu = thoiKhoaBieu;
     }
 }

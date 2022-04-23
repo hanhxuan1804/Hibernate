@@ -95,4 +95,12 @@ public class Thoikhoabieu {
     public void setTenPhongHoc(String tenPhongHoc) {
         this.tenPhongHoc = tenPhongHoc;
     }
+
+    @Override
+    public String toString(){
+        return  "Môn học: " +  monHoc +",   Phòng: "+tenPhongHoc+
+                ",   Ngày bắt đầu: "+ ngayBatDau +",    Thứ: "+thuTrongTuan+",    Giờ: "+gioBatDau+"->"+
+                gioKetThuc;
+    }
+
 }
