@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+    <persistence-unit name="default">
+        <mapping-file>Diemdanh.xml</mapping-file>
+        <mapping-file>Monhoc.xml</mapping-file>
+        <mapping-file>Sinhvien.xml</mapping-file>
+        <mapping-file>Sinhvienmonhoc.xml</mapping-file>
+        <mapping-file>Thoikhoabieu.xml</mapping-file>
+        <mapping-file>User.xml</mapping-file>
+        <class>entity.Diemdanh</class>
+        <class>entity.Monhoc</class>
+        <class>entity.Sinhvien</class>
+        <class>entity.Sinhvienmonhoc</class>
+        <class>entity.Thoikhoabieu</class>
+        <class>entity.User</class>
+
+        <properties>
+            <property name="hibernate.connection.url" value="jdbc:mysql://127.0.0.1:3306/qlhs"/>
+            <property name="hibernate.connection.driver_class" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.connection.username" value="root"/>
+            <property name="hibernate.connection.password" value="Hanh18042001"/>
+        </properties>
+    </persistence-unit>
+</persistence>

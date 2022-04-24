@@ -8,6 +8,9 @@ import java.awt.event.ActionListener;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,44 +24,42 @@ public class LoginWindow {
     private JButton loginButton;
     private static JFrame frame;
 
+    private List<User> userList;
 
     public LoginWindow(){
-
+        userList = loadUser();
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LoadingWindow l = new LoadingWindow();
                 l.start();
-                Callable<User> callable = new Callable<User>() {
-                    @Override
-                    public User call() throws Exception {
-                        return findUser(usernameField.getText());
-                    }
-                };
-                try {
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    Future<User> future = executor.submit(callable);
 
+                boolean trueLogin = false;
+                for (User user:userList
+                     ) {
+                    if (Objects.equals(user.getUsername(), usernameField.getText())
+                        && Objects.equals(user.getPassword(), hashPassword(passwordField.getPassword()))){
 
-                    //wait for the task to finished
-                    User user = future.get();
-                    if (user.getId() == -1 || user.getType() != 1 ||
-                            !hashPassword(passwordField.getPassword()).equals(user.getPassword())) {
-
-                        JOptionPane.showMessageDialog(frame,
-                                "Error: Username or password incorrect!",
-                                "Login fail", JOptionPane.ERROR_MESSAGE);
-
-                    } else {
                         //TODO: kiểm tra học sinh hay giáo vụ
                         // Nếu học sinh đăng nhập lần đầu thì phải đổi mật khẩu
-                        frame.dispose();
-                        MainApp.run();
+                        if(user.getType() ==1){
+                            trueLogin = true;
+                            MainApp mainApp = new MainApp(userList.size());
+                            mainApp.run();
+                            frame.dispose();
+                        }
+                        else{
+
+                        }
                     }
-                    l.close();
-                } catch (Exception ex) {
-                    System.out.println(ex.getMessage());
                 }
+                if(!trueLogin){
+                    JOptionPane.showMessageDialog(frame,
+                            "Error: Username or password incorrect!",
+                            "Login fail", JOptionPane.ERROR_MESSAGE);
+                }
+                l.close();
+
             }
         });
     }
@@ -73,7 +74,7 @@ public class LoginWindow {
         frame.setVisible(true);
     }
 
-    public String hashPassword(char[] password){
+    public static String hashPassword(char[] password){
         String pass = String.copyValueOf(password);
         MessageDigest msg = null;
         try {
@@ -90,23 +91,19 @@ public class LoginWindow {
         return s.toString();
     }
 
-    public User findUser(String user) {
+    public List<User> loadUser() {
 
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction entityTransaction = entityManager.getTransaction();
 
-        User result;
+        List<User> result;
         try {
             entityTransaction.begin();
 
-            TypedQuery<User> userTypedQuery = entityManager.createNamedQuery("UserByUsername", User.class);
-            userTypedQuery.setParameter(1, user);
-            if(userTypedQuery.getResultList().isEmpty()){
-                result= new User();
-                result.setId(-1);
-            }
-            else{result = userTypedQuery.getSingleResult();}
+            TypedQuery<User> userTypedQuery = entityManager.createNamedQuery("ListUser", User.class);
+            //userTypedQuery.setParameter(1, user);
+           result = userTypedQuery.getResultList();
 
             entityTransaction.commit();
         } finally {

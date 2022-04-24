@@ -10,6 +10,7 @@ import java.util.Map;
 
 @Entity
 @NamedQuery(name ="UserByUsername", query = "SELECT u FROM User u WHERE u.username = ?1 ")
+@NamedQuery(name ="ListUser", query = "SELECT u FROM User u ")
 public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

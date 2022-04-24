@@ -4,6 +4,8 @@ import javax.persistence.*;
 
 @Entity
 @IdClass(SinhvienmonhocPK.class)
+@NamedQuery(name ="SVMHbyMaMonHoc", query = "SELECT u FROM Sinhvienmonhoc u WHERE u.maMonHoc = ?1 ")
+@NamedQuery(name ="ListSVMH", query = "SELECT u FROM Sinhvienmonhoc u ")
 public class Sinhvienmonhoc {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

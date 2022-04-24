@@ -1,14 +1,15 @@
-import entity.Monhoc;
-import entity.Sinhvien;
-import entity.Thoikhoabieu;
+import entity.*;
 
 import javax.persistence.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListDataListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
@@ -31,18 +32,26 @@ public class MainApp implements Observer {
     private JComboBox comboBoxPhuongThuc;
     private JPanel cardCheck;
     private JList listSinhVien;
-    private JButton btnThemDSSV;
     private JPanel panelQLHSCard;
     private JPanel cardAdd;
-    private JCheckBox checkBox1;
     private JPanel cardImport;
     private JCheckBox checkBox2;
     private JComboBox comboBoxMonHoc;
+    private JTextField textFieldMSSV;
+    private JTextField textFieldHoTen;
+    private JTextField textFieldEmail;
+    private JFormattedTextField textFieldNgaySinh;
+    private JButton btnThemSVMH;
+    private JButton xemDanhSáchButton;
+    private JTextArea labelThongBao;
 
     private Thoikhoabieu thoikhoabieu;
     private final DefaultListModel<Thoikhoabieu> listModel = new DefaultListModel<>();
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private int userIDCreate;
+    private DefaultListModel<CheckListItem> lsvModel;
+    private List<Sinhvienmonhoc> sinhvienmonhocList;
 
     private static MainApp instance;
     private static JFrame frame;
@@ -55,8 +64,11 @@ public class MainApp implements Observer {
         listThoiKhoaBieu.setModel(listModel);
     }
 
-    public MainApp(){
+    public MainApp(int maxUser){
+
         instance=this;
+        userIDCreate =maxUser;
+        loadSinhVienMonHoc();
         btnTaoMonHoc.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -75,27 +87,163 @@ public class MainApp implements Observer {
             }
         });
         initCardLayoutAddSubject();
+        initCardlayoutQLHS();
+        btnThemSVMH.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(comboBoxPhuongThuc.getSelectedItem() == "Nhập sinh viên mới"){
+                    addNewStudent();
+                    updateJListCheckSV();
+                }
+                else if(comboBoxPhuongThuc.getSelectedItem() ==  "Check chọn"){
+                    addByList();
+                }
+                else{
+
+                }
+            }
+        });
+        comboBoxMonHoc.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                updateJListCheckSV();
+            }
+        });
+    }
+
+    private void addByList() {
+        LoadingWindow l = new LoadingWindow();
+        l.start();
+        executorService.submit(() ->{
+            EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            EntityTransaction entityTransaction = entityManager.getTransaction();
+            lock.writeLock().lock();
+
+            try {
+                entityTransaction.begin();
+                DefaultListModel<CheckListItem> model = (DefaultListModel<CheckListItem>) listSinhVien.getModel();
+                for (int i = 0; i < model.getSize(); i++) {
+                    if(model.elementAt(i).isSelected()){
+                        String label =model.elementAt(i).toString();
+                        String mssv = label.substring(0,label.indexOf(" "));
+                        Sinhvienmonhoc svmh= new Sinhvienmonhoc();
+                        svmh.setMaSinhVien(mssv);
+                        svmh.setMaMonHoc(comboBoxMonHoc.getSelectedItem().toString());
+
+                        sinhvienmonhocList.add(svmh);
+                        entityManager.persist(svmh);
+                        model.elementAt(i).setSelected(false);
+                    }
+                }
+
+                entityTransaction.commit();
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+            finally
+            {
+
+                if (entityTransaction.isActive()) {
+                    entityTransaction.rollback();
+                }
+                entityManager.close();
+                entityManagerFactory.close();
+                lock.writeLock().unlock();
+                l.close();
+                updateJListCheckSV();
+                JOptionPane.showMessageDialog(panelCard1,
+                        "Done: Add student to subject successful!",
+                        "Add student...",JOptionPane.INFORMATION_MESSAGE);
+
+            }
+        });
 
     }
 
+    private void loadSinhVienMonHoc() {
+        Callable<List<Sinhvienmonhoc>> callable = new Callable<List<Sinhvienmonhoc>>() {
+            @Override
+            public List<Sinhvienmonhoc> call() throws Exception {
+                EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+                EntityManager entityManager = entityManagerFactory.createEntityManager();
+                EntityTransaction entityTransaction = entityManager.getTransaction();
 
-    public static void run(){
+                List<Sinhvienmonhoc> result;
+                try {
+                    entityTransaction.begin();
+
+                    TypedQuery<Sinhvienmonhoc> svmHbyMaMonHoc = entityManager.createNamedQuery("ListSVMH", Sinhvienmonhoc.class);
+                    result = svmHbyMaMonHoc.getResultList();
+
+                    entityTransaction.commit();
+                } finally {
+                    if (entityTransaction.isActive()) {
+                        entityTransaction.rollback();
+                    }
+
+                    entityManager.close();
+                    entityManagerFactory.close();
+                }
+                return result;
+            }
+        };
+        Future<List<Sinhvienmonhoc>> future = executorService.submit(callable);
+        try {
+            sinhvienmonhocList = future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    private void updateJListCheckSV() {
+        DefaultListModel<CheckListItem> svModel = new DefaultListModel<>();
+        List<Sinhvienmonhoc> list = new ArrayList<>();
+        for (Sinhvienmonhoc s: sinhvienmonhocList
+        ) {
+            if(s.getMaMonHoc().equals(comboBoxMonHoc.getSelectedItem())){
+                list.add(s);
+            }
+        }
+            for (int i=0;i<lsvModel.getSize();i++ ) {
+                boolean check = false;
+                for (Sinhvienmonhoc s: list
+                ) {
+                    if(lsvModel.getElementAt(i).toString().startsWith(s.getMaSinhVien())){
+                        check = true;
+                    }
+                }
+                if(!check){
+                    svModel.addElement(lsvModel.getElementAt(i));
+                }
+            }
+
+        listSinhVien.setModel(svModel);
+        listSinhVien.updateUI();
+    }
+
+
+    public void run(){
         frame = new JFrame("Attendance Application");
-        frame.setContentPane(new MainApp().panel1);
+        frame.setContentPane(panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    public static void main(String[] agrs ){
-        frame = new JFrame("Attendance Application");
-        frame.setContentPane((new MainApp()).panel1);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
+//    public static void main(String[] agrs ){
+//        frame = new JFrame("Attendance Application");
+//        frame.setContentPane(panel1);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.pack();
+//        frame.setLocationRelativeTo(null);
+//        frame.setVisible(true);
+//    }
 
 
     private void updateJListTKB(){
@@ -106,10 +254,75 @@ public class MainApp implements Observer {
         listThoiKhoaBieu.updateUI();
     }
 
+    private void addNewStudent(){
+        LoadingWindow l = new LoadingWindow();
+        l.start();
+        executorService.submit(() ->{
+            EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            EntityTransaction entityTransaction = entityManager.getTransaction();
+            lock.writeLock().lock();
+
+            try {
+                entityTransaction.begin();
+                Sinhvien sinhvien = new Sinhvien();
+                sinhvien.setHoTen(textFieldHoTen.getText());
+                sinhvien.setMaSinhVien(textFieldMSSV.getText());
+                sinhvien.setEmail(textFieldEmail.getText());
+                SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy");
+                try {
+                    java.util.Date sd = simpleDateFormat.parse(textFieldNgaySinh.getText());
+                    java.sql.Date date = new java.sql.Date(sd.getTime());
+                    sinhvien.setNgaySinh(date);
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
+                User user = new User();
+                user.setId(userIDCreate);
+                user.setUsername(sinhvien.getMaSinhVien());
+                user.setPassword(LoginWindow.hashPassword(sinhvien.getMaSinhVien().toCharArray()));
+                user.setEmail(sinhvien.getEmail());
+                user.setType(0);
+                user.setCreateTime(Timestamp.valueOf(LocalDateTime.now()));
+
+                Sinhvienmonhoc svmh = new Sinhvienmonhoc();
+                svmh.setMaSinhVien(sinhvien.getMaSinhVien());
+                svmh.setMaMonHoc((String) comboBoxMonHoc.getSelectedItem());
+                sinhvienmonhocList.add(svmh);
+                lsvModel.addElement(new CheckListItem(sinhvien.getMaSinhVien() + "   " + sinhvien.getHoTen()));
+                updateJListCheckSV();
+
+                entityManager.persist(sinhvien);
+                entityManager.persist(user);
+                entityManager.persist(svmh);
+
+                entityTransaction.commit();
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+            finally
+            {
+
+                if (entityTransaction.isActive()) {
+                    entityTransaction.rollback();
+                }
+                entityManager.close();
+                entityManagerFactory.close();
+                lock.writeLock().unlock();
+                l.close();
+                JOptionPane.showMessageDialog(panelCard1,
+                        "Done: Add student to subject successful!",
+                        "Add student...",JOptionPane.INFORMATION_MESSAGE);
+
+            }
+        });
+    }
 
     public static MainApp getInstance(){
         if(instance==null){
-            instance =new MainApp();
+            instance =new MainApp(-1);
         }
         return instance;
     }
@@ -186,13 +399,12 @@ public class MainApp implements Observer {
         });
     }
 
-    private void createUIComponents() throws ExecutionException, InterruptedException {
-        initCardlayoutQLHS();
-
+    private void createUIComponents() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        textFieldNgaySinh = new JFormattedTextField(dateFormat);
     }
 
-    private void initCardlayoutQLHS() throws ExecutionException, InterruptedException {
-        executorService=Executors.newFixedThreadPool(5);
+    private void initCardlayoutQLHS(){
         Callable<List<CheckListItem>> callable = new Callable<List<CheckListItem> >() {
             @Override
             public List<CheckListItem>  call() throws Exception {
@@ -231,7 +443,12 @@ public class MainApp implements Observer {
         List<CheckListItem> checkListItems ;
         try {
             checkListItems = future.get();
-            listSinhVien = new JList<>(checkListItems.toArray());
+            lsvModel= new DefaultListModel<>();
+            for (CheckListItem c:checkListItems
+                 ) {
+                lsvModel.addElement(c);
+            }
+            listSinhVien.setModel(lsvModel);
             listSinhVien.setCellRenderer(new CheckListRenderer());
             listSinhVien.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             listSinhVien.addMouseListener(new MouseAdapter() {
@@ -249,18 +466,7 @@ public class MainApp implements Observer {
             e.printStackTrace();
         }
 
-        String[] selections = { "Check chọn", "Nhập sinh viên mới", "Import từ CSV"};
-        comboBoxPhuongThuc= new JComboBox(selections);
-        //comboBoxPhuongThuc.setSelectedIndex(0);
-        comboBoxPhuongThuc.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getSource() == comboBoxPhuongThuc) {
-                    int i = comboBoxPhuongThuc.getSelectedIndex() +1 ;
-                    ((CardLayout) panelQLHSCard.getLayout()).show(panelQLHSCard,"Card"+i);
-                }
-            }
-        });
+
     }
 
     private  void initComboBoxMonHoc() throws ExecutionException, InterruptedException {
@@ -305,6 +511,20 @@ public class MainApp implements Observer {
             cbModel.addElement(s);
         }
         comboBoxMonHoc.setModel(cbModel);
+
+        String[] selections = { "Check chọn", "Nhập sinh viên mới", "Import từ CSV"};
+        DefaultComboBoxModel<String> ptModel = new DefaultComboBoxModel<>(selections);
+        comboBoxPhuongThuc.setModel(ptModel);
+        comboBoxPhuongThuc.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getSource() == comboBoxPhuongThuc) {
+                    int i = comboBoxPhuongThuc.getSelectedIndex() +1 ;
+                    ((CardLayout) panelQLHSCard.getLayout()).show(panelQLHSCard,"Card"+i);
+
+                }
+            }
+        });
     }
 }
 
