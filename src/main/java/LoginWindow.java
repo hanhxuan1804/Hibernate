@@ -65,13 +65,14 @@ public class LoginWindow {
     }
 
     public static void main(String[] args) {
-        frame = new JFrame("Login");
-        frame.setContentPane((new LoginWindow()).mainPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        MainApp.getInstance().run();
+//        frame = new JFrame("Login");
+//        frame.setContentPane((new LoginWindow()).mainPanel);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setResizable(false);
+//        frame.pack();
+//        frame.setLocationRelativeTo(null);
+//        frame.setVisible(true);
     }
 
     public static String hashPassword(char[] password){

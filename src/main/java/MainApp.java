@@ -6,6 +6,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MainApp implements Observer {
+    public static final String filecsv = "data.csv";
+
     private JPanel panel1;
     private JButton btnTaoMonHoc;
     private JButton btnQuanLy;
@@ -35,7 +38,6 @@ public class MainApp implements Observer {
     private JPanel panelQLHSCard;
     private JPanel cardAdd;
     private JPanel cardImport;
-    private JCheckBox checkBox2;
     private JComboBox comboBoxMonHoc;
     private JTextField textFieldMSSV;
     private JTextField textFieldHoTen;
@@ -44,6 +46,9 @@ public class MainApp implements Observer {
     private JButton btnThemSVMH;
     private JButton xemDanhSáchButton;
     private JTextArea labelThongBao;
+    private JButton exportTemplateButton;
+    private JButton importFromTemplateButton;
+    private JList listSVFromCSV;
 
     private Thoikhoabieu thoikhoabieu;
     private final DefaultListModel<Thoikhoabieu> listModel = new DefaultListModel<>();
@@ -52,6 +57,7 @@ public class MainApp implements Observer {
     private int userIDCreate;
     private DefaultListModel<CheckListItem> lsvModel;
     private List<Sinhvienmonhoc> sinhvienmonhocList;
+    private final DefaultListModel<Sinhvien> csvModel = new DefaultListModel<>();
 
     private static MainApp instance;
     private static JFrame frame;
@@ -99,7 +105,8 @@ public class MainApp implements Observer {
                     addByList();
                 }
                 else{
-
+                    addByCSV();
+                    updateJListCheckSV();
                 }
             }
         });
@@ -109,7 +116,144 @@ public class MainApp implements Observer {
                 updateJListCheckSV();
             }
         });
+        exportTemplateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                File file = new File(filecsv);
+                try {
+                    if(!file.exists()){
+                        file.createNewFile();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                try{
+                    PrintWriter out = new PrintWriter(file);
+                    out.println("Mã Sinh Viên,Họ tên,Email,Ngày Sinh(dd/MM/yyyy)");
+                    Desktop desktop = Desktop.getDesktop();
+                    desktop.edit(file);
+                    out.close();
+                }catch(IOException ex){
+                    System.out.println("Error: " + ex.getMessage());
+                }
+            }
+        });
+        importFromTemplateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                csvModel.removeAllElements();
+                File file = new File(filecsv);
+                try {
+                    if(!file.exists()){
+                        file.createNewFile();
+                        return;
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                try{
+                    BufferedReader in = new BufferedReader(new FileReader(file));
+                    String line = in .readLine();
+                    line = in .readLine();
+                    while(line != null && line != ""){
+                        String[] tokens ={"", "", "", "1/1/1990"};
+                        String[] split = line.split(",");
+                        for (int i = 0; i < split.length; i++) {
+                            tokens[i] = split[i];
+                        }
+                        Sinhvien sv = new Sinhvien();
+                        sv.setMaSinhVien(tokens[0]);
+                        sv.setHoTen(tokens[1]);
+                        sv.setEmail(tokens[2]);
+                        SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy");
+                        try {
+                            java.util.Date sd = simpleDateFormat.parse(tokens[3]);
+                            java.sql.Date date = new java.sql.Date(sd.getTime());
+                            sv.setNgaySinh(date);
+                        } catch (ParseException ex) {
+                            ex.printStackTrace();}
+                        line = in.readLine();
+                        csvModel.addElement(sv);
+                    }
+                    in.close();
+                }catch(IOException ex){
+                    System.out.println("Error: " + ex.getMessage());
+                }
+                listSVFromCSV.setModel(csvModel);
+                listSVFromCSV.updateUI();
+            }
+        });
+        xemDanhSáchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LoadingWindow l= new LoadingWindow();
+                l.start();
+                ViewStudentOfSubject ss = new ViewStudentOfSubject((String) comboBoxMonHoc.getSelectedItem());
+                ss.run();
+                l.close();
+            }
+        });
     }
+
+    private void addByCSV() {
+        LoadingWindow l = new LoadingWindow();
+        l.start();
+        executorService.submit(() ->{
+            EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            EntityTransaction entityTransaction = entityManager.getTransaction();
+            lock.writeLock().lock();
+
+            try {
+                entityTransaction.begin();
+                for (int i = 0; i < csvModel.getSize(); i++) {
+                    TypedQuery<Long> checkSVInDatabase = entityManager.createNamedQuery("SVByMaSinhVien",Long.class);
+                    checkSVInDatabase.setParameter(1, csvModel.getElementAt(i).getMaSinhVien());
+                    System.out.println(checkSVInDatabase.getSingleResult());
+                    if(checkSVInDatabase.getSingleResult()==0){
+                        lsvModel.addElement(new CheckListItem(csvModel.getElementAt(i).getMaSinhVien() + "   " + csvModel.getElementAt(i).getHoTen()));
+                        entityManager.persist(csvModel.getElementAt(i));
+                    }
+                }
+                TypedQuery<String> typedQuery = entityManager.createNamedQuery("GetMSVofMH",String.class);
+                typedQuery.setParameter(1,(String) comboBoxMonHoc.getSelectedItem());
+                List<String> lsv = typedQuery.getResultList();
+                for (int i = 0; i < csvModel.getSize(); i++) {
+                    if(!lsv.contains(csvModel.getElementAt(i).getMaSinhVien())){
+                        Sinhvienmonhoc svmh = new Sinhvienmonhoc();
+                        svmh.setMaMonHoc((String) comboBoxMonHoc.getSelectedItem());
+                        svmh.setMaSinhVien(csvModel.getElementAt(i).getMaSinhVien());
+                        sinhvienmonhocList.add(svmh);
+                        entityManager.persist(svmh);
+                    }
+                }
+                entityTransaction.commit();
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+            finally
+            {
+
+                if (entityTransaction.isActive()) {
+                    entityTransaction.rollback();
+                }
+                entityManager.close();
+                entityManagerFactory.close();
+                lock.writeLock().unlock();
+                l.close();
+                updateJListCheckSV();
+                JOptionPane.showMessageDialog(panelCard1,
+                        "Done: Add student to subject successful!",
+                        "Add student...",JOptionPane.INFORMATION_MESSAGE);
+
+            }
+
+        });
+
+    }
+
 
     private void addByList() {
         LoadingWindow l = new LoadingWindow();
@@ -235,15 +379,6 @@ public class MainApp implements Observer {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-
-//    public static void main(String[] agrs ){
-//        frame = new JFrame("Attendance Application");
-//        frame.setContentPane(panel1);
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.pack();
-//        frame.setLocationRelativeTo(null);
-//        frame.setVisible(true);
-//    }
 
 
     private void updateJListTKB(){
