@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -26,7 +27,7 @@ public class MainApp implements Observer {
     private JButton btnXemDiemDanh;
     private JPanel panelCardLayout;
     private JPanel panelCard1;
-    private JPanel panelcard2;
+    private JPanel panelCard2;
     private JTextField textTenMonHoc;
     private JTextField textMaMonHoc;
     private JList<Thoikhoabieu> listThoiKhoaBieu;
@@ -49,15 +50,23 @@ public class MainApp implements Observer {
     private JButton exportTemplateButton;
     private JButton importFromTemplateButton;
     private JList listSVFromCSV;
+    private JPanel panelCard3;
+    private JTable tableDiemDanh;
+    private JComboBox comboMHDiemDanh;
+    private JButton lưuButton;
+    private JList listLinkToTable;
 
-    private Thoikhoabieu thoikhoabieu;
-    private final DefaultListModel<Thoikhoabieu> listModel = new DefaultListModel<>();
+
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
     private int userIDCreate;
+    private Thoikhoabieu thoikhoabieu;
+    private final DefaultListModel<Thoikhoabieu> listModel = new DefaultListModel<>();
     private DefaultListModel<CheckListItem> lsvModel;
     private List<Sinhvienmonhoc> sinhvienmonhocList;
     private final DefaultListModel<Sinhvien> csvModel = new DefaultListModel<>();
+
 
     private static MainApp instance;
     private static JFrame frame;
@@ -74,7 +83,13 @@ public class MainApp implements Observer {
 
         instance=this;
         userIDCreate =maxUser;
+
         loadSinhVienMonHoc();
+        initCardLayoutAddSubject();
+        initComboBoxMonHoc();
+        initCardlayoutQLHS();
+        initCardLayoutXDD();
+
         btnTaoMonHoc.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -84,16 +99,9 @@ public class MainApp implements Observer {
         btnQuanLy.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    initComboBoxMonHoc();
-                } catch (ExecutionException | InterruptedException ex) {
-                    ex.printStackTrace();
-                }
                 ((CardLayout) panelCardLayout.getLayout()).show(panelCardLayout,"Card2");
             }
         });
-        initCardLayoutAddSubject();
-        initCardlayoutQLHS();
         btnThemSVMH.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -167,7 +175,7 @@ public class MainApp implements Observer {
                         sv.setEmail(tokens[2]);
                         SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy");
                         try {
-                            java.util.Date sd = simpleDateFormat.parse(tokens[3]);
+                            Date sd = simpleDateFormat.parse(tokens[3]);
                             java.sql.Date date = new java.sql.Date(sd.getTime());
                             sv.setNgaySinh(date);
                         } catch (ParseException ex) {
@@ -193,6 +201,88 @@ public class MainApp implements Observer {
                 l.close();
             }
         });
+        btnXemDiemDanh.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((CardLayout) panelCardLayout.getLayout()).show(panelCardLayout,"Card3");
+            }
+        });
+        comboMHDiemDanh.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                initCardLayoutXDD();
+            }
+        });
+    }
+
+    private void initCardLayoutXDD() {
+        executorService.submit(() ->{
+            DefaultTableModel model = new DefaultTableModel(new Object[]{"Tuần 1","Tuần 2","Tuần 3","Tuần 4","Tuần 5",
+                    "Tuần 6","Tuần 7","Tuần 8","Tuần 9","Tuần 10",
+                    "Tuần 11","Tuần 12","Tuần 13","Tuần 14","Tuần 15"},0){
+                @Override
+                public Class getColumnClass(int columnIndex) {
+                    return Boolean.class;
+                }
+            };
+
+
+            EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            EntityTransaction entityTransaction = entityManager.getTransaction();
+            lock.readLock().lock();
+
+            try {
+                entityTransaction.begin();
+                TypedQuery<String> getMSVofMH = entityManager.createNamedQuery("GetMSVofMH",String.class);
+                getMSVofMH.setParameter(1,(String) comboMHDiemDanh.getSelectedItem());
+                List<String> svmh = getMSVofMH.getResultList();
+
+                TypedQuery<Diemdanh> typedQuery = entityManager.createNamedQuery("ListDDofMH",Diemdanh.class);
+                typedQuery.setParameter(1,(String) comboMHDiemDanh.getSelectedItem());
+                List<Diemdanh> diemdanh = typedQuery.getResultList();
+                Object[][] data = new Object[svmh.size()][15];
+                for (int i = 0; i < svmh.size(); i++) {
+                    for (Diemdanh value : diemdanh) {
+                        if (Objects.equals(value.getMaSinhVien(), svmh.get(i))) {
+                            data[i][value.getTuan()-1] = new Boolean(true);
+
+                        }
+                    }
+                    model.addRow(data[i]);
+                }
+                DefaultListModel<String> lmd= new DefaultListModel<>();
+                lmd.addElement("-MSSV-");
+                for (String s:svmh
+                     ) {
+                    lmd.addElement(s);
+                }
+                SwingUtilities.invokeAndWait(()->{
+                    listLinkToTable.setModel(lmd);
+                    tableDiemDanh.setModel(model);
+                    listLinkToTable.setFixedCellHeight(20);
+                    tableDiemDanh.setRowHeight(20);
+
+                    tableDiemDanh.updateUI();
+                    listLinkToTable.updateUI();
+                });
+                entityTransaction.commit();
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+            finally
+            {
+                if (entityTransaction.isActive()) {
+                    entityTransaction.rollback();
+                }
+                entityManager.close();
+                entityManagerFactory.close();
+                lock.readLock().unlock();
+            }
+        });
+
     }
 
     private void addByCSV() {
@@ -254,7 +344,6 @@ public class MainApp implements Observer {
 
     }
 
-
     private void addByList() {
         LoadingWindow l = new LoadingWindow();
         l.start();
@@ -305,88 +394,6 @@ public class MainApp implements Observer {
             }
         });
 
-    }
-
-    private void loadSinhVienMonHoc() {
-        Callable<List<Sinhvienmonhoc>> callable = new Callable<List<Sinhvienmonhoc>>() {
-            @Override
-            public List<Sinhvienmonhoc> call() throws Exception {
-                EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
-                EntityManager entityManager = entityManagerFactory.createEntityManager();
-                EntityTransaction entityTransaction = entityManager.getTransaction();
-
-                List<Sinhvienmonhoc> result;
-                try {
-                    entityTransaction.begin();
-
-                    TypedQuery<Sinhvienmonhoc> svmHbyMaMonHoc = entityManager.createNamedQuery("ListSVMH", Sinhvienmonhoc.class);
-                    result = svmHbyMaMonHoc.getResultList();
-
-                    entityTransaction.commit();
-                } finally {
-                    if (entityTransaction.isActive()) {
-                        entityTransaction.rollback();
-                    }
-
-                    entityManager.close();
-                    entityManagerFactory.close();
-                }
-                return result;
-            }
-        };
-        Future<List<Sinhvienmonhoc>> future = executorService.submit(callable);
-        try {
-            sinhvienmonhocList = future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-    private void updateJListCheckSV() {
-        DefaultListModel<CheckListItem> svModel = new DefaultListModel<>();
-        List<Sinhvienmonhoc> list = new ArrayList<>();
-        for (Sinhvienmonhoc s: sinhvienmonhocList
-        ) {
-            if(s.getMaMonHoc().equals(comboBoxMonHoc.getSelectedItem())){
-                list.add(s);
-            }
-        }
-            for (int i=0;i<lsvModel.getSize();i++ ) {
-                boolean check = false;
-                for (Sinhvienmonhoc s: list
-                ) {
-                    if(lsvModel.getElementAt(i).toString().startsWith(s.getMaSinhVien())){
-                        check = true;
-                    }
-                }
-                if(!check){
-                    svModel.addElement(lsvModel.getElementAt(i));
-                }
-            }
-
-        listSinhVien.setModel(svModel);
-        listSinhVien.updateUI();
-    }
-
-
-    public void run(){
-        frame = new JFrame("Attendance Application");
-        frame.setContentPane(panel1);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
-
-
-    private void updateJListTKB(){
-        for (int i =0; i< listModel.getSize();i++){
-            listModel.elementAt(i).setMonHoc(textMaMonHoc.getText());
-        }
-        listThoiKhoaBieu.setModel(listModel);
-        listThoiKhoaBieu.updateUI();
     }
 
     private void addNewStudent(){
@@ -455,11 +462,73 @@ public class MainApp implements Observer {
         });
     }
 
-    public static MainApp getInstance(){
-        if(instance==null){
-            instance =new MainApp(-1);
+    private void loadSinhVienMonHoc() {
+        Callable<List<Sinhvienmonhoc>> callable = new Callable<List<Sinhvienmonhoc>>() {
+            @Override
+            public List<Sinhvienmonhoc> call() throws Exception {
+                EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+                EntityManager entityManager = entityManagerFactory.createEntityManager();
+                EntityTransaction entityTransaction = entityManager.getTransaction();
+
+                List<Sinhvienmonhoc> result;
+                try {
+                    entityTransaction.begin();
+
+                    TypedQuery<Sinhvienmonhoc> svmHbyMaMonHoc = entityManager.createNamedQuery("ListSVMH", Sinhvienmonhoc.class);
+                    result = svmHbyMaMonHoc.getResultList();
+
+                    entityTransaction.commit();
+                } finally {
+                    if (entityTransaction.isActive()) {
+                        entityTransaction.rollback();
+                    }
+
+                    entityManager.close();
+                    entityManagerFactory.close();
+                }
+                return result;
+            }
+        };
+        Future<List<Sinhvienmonhoc>> future = executorService.submit(callable);
+        try {
+            sinhvienmonhocList = future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
-        return instance;
+    }
+
+    private void updateJListCheckSV() {
+        DefaultListModel<CheckListItem> svModel = new DefaultListModel<>();
+        List<Sinhvienmonhoc> list = new ArrayList<>();
+        for (Sinhvienmonhoc s: sinhvienmonhocList
+        ) {
+            if(s.getMaMonHoc().equals(comboBoxMonHoc.getSelectedItem())){
+                list.add(s);
+            }
+        }
+            for (int i=0;i<lsvModel.getSize();i++ ) {
+                boolean check = false;
+                for (Sinhvienmonhoc s: list
+                ) {
+                    if(lsvModel.getElementAt(i).toString().startsWith(s.getMaSinhVien())){
+                        check = true;
+                    }
+                }
+                if(!check){
+                    svModel.addElement(lsvModel.getElementAt(i));
+                }
+            }
+
+        listSinhVien.setModel(svModel);
+        listSinhVien.updateUI();
+    }
+
+    private void updateJListTKB(){
+        for (int i =0; i< listModel.getSize();i++){
+            listModel.elementAt(i).setMonHoc(textMaMonHoc.getText());
+        }
+        listThoiKhoaBieu.setModel(listModel);
+        listThoiKhoaBieu.updateUI();
     }
 
     private void initCardLayoutAddSubject(){
@@ -540,6 +609,20 @@ public class MainApp implements Observer {
     }
 
     private void initCardlayoutQLHS(){
+        String[] selections = { "Check chọn", "Nhập sinh viên mới", "Import từ CSV"};
+        DefaultComboBoxModel<String> ptModel = new DefaultComboBoxModel<>(selections);
+        comboBoxPhuongThuc.setModel(ptModel);
+        comboBoxPhuongThuc.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getSource() == comboBoxPhuongThuc) {
+                    int i = comboBoxPhuongThuc.getSelectedIndex() +1 ;
+                    ((CardLayout) panelQLHSCard.getLayout()).show(panelQLHSCard,"Card"+i);
+
+                }
+            }
+        });
+
         Callable<List<CheckListItem>> callable = new Callable<List<CheckListItem> >() {
             @Override
             public List<CheckListItem>  call() throws Exception {
@@ -604,7 +687,7 @@ public class MainApp implements Observer {
 
     }
 
-    private  void initComboBoxMonHoc() throws ExecutionException, InterruptedException {
+    private  void initComboBoxMonHoc()  {
         Callable<List<String>> callableMH = new Callable<List<String> >() {
             @Override
             public List<String>  call() throws Exception {
@@ -638,28 +721,34 @@ public class MainApp implements Observer {
             }
         };
         Future<List<String>> future1 = executorService.submit(callableMH);
-
-        List<String> stringList = future1.get();
-        DefaultComboBoxModel<String> cbModel = new DefaultComboBoxModel<>();
-        for (String s:stringList
-        ) {
-            cbModel.addElement(s);
-        }
-        comboBoxMonHoc.setModel(cbModel);
-
-        String[] selections = { "Check chọn", "Nhập sinh viên mới", "Import từ CSV"};
-        DefaultComboBoxModel<String> ptModel = new DefaultComboBoxModel<>(selections);
-        comboBoxPhuongThuc.setModel(ptModel);
-        comboBoxPhuongThuc.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getSource() == comboBoxPhuongThuc) {
-                    int i = comboBoxPhuongThuc.getSelectedIndex() +1 ;
-                    ((CardLayout) panelQLHSCard.getLayout()).show(panelQLHSCard,"Card"+i);
-
-                }
+        try {
+            List<String> stringList = future1.get();
+            DefaultComboBoxModel<String> cbModel = new DefaultComboBoxModel<>();
+            for (String s:stringList
+            ) {
+                cbModel.addElement(s);
             }
-        });
+            comboBoxMonHoc.setModel(cbModel);
+            comboMHDiemDanh.setModel(cbModel);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void run(){
+        frame = new JFrame("Attendance Application");
+        frame.setContentPane(panel1);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    public static MainApp getInstance(){
+        if(instance==null){
+            instance =new MainApp(-1);
+        }
+        return instance;
     }
 }
 
@@ -696,5 +785,26 @@ class CheckListRenderer extends JCheckBox implements ListCellRenderer {
         setForeground(list.getForeground());
         setText(value.toString());
         return this;
+    }
+}
+
+class KetQuaDiemDanh{
+    private String mssv;
+    private Object[] list;
+
+    public Object[] getList() {
+        return list;
+    }
+
+    public void setList(Object[] list) {
+        this.list = list;
+    }
+
+    public String getMssv() {
+        return mssv;
+    }
+
+    public void setMssv(String mssv) {
+        this.mssv = mssv;
     }
 }

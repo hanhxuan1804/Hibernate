@@ -3,7 +3,7 @@ package entity;
 import javax.persistence.*;
 
 @Entity
-@IdClass(DiemdanhPK.class)
+@NamedQuery(name ="ListDDofMH", query = "SELECT d FROM Diemdanh d , Thoikhoabieu t where d.maThoiKhoaBieu = t.maThoiKhoaBieu and t.monHoc = ?1")
 public class Diemdanh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -13,7 +13,8 @@ public class Diemdanh {
     @Id
     @Column(name = "MaSinhVien")
     private String maSinhVien;
-    @Basic
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "Tuan")
     private Integer tuan;
 
@@ -39,5 +40,10 @@ public class Diemdanh {
 
     public void setTuan(Integer tuan) {
         this.tuan = tuan;
+    }
+
+    @Override
+    public String toString(){
+        return maThoiKhoaBieu+ ", MSSV: " + maSinhVien+ ", Tuần: "+tuan;
     }
 }

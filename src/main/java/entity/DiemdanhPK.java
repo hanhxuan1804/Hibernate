@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class DiemdanhPK implements Serializable {
     private int maThoiKhoaBieu;
     private String maSinhVien;
+    private int tuan;
 
     public int getMaThoiKhoaBieu() {
         return maThoiKhoaBieu;
@@ -20,6 +21,14 @@ public class DiemdanhPK implements Serializable {
 
     public void setMaSinhVien(String maSinhVien) {
         this.maSinhVien = maSinhVien;
+    }
+
+    public Integer getTuan() {
+        return tuan;
+    }
+
+    public void setTuan(Integer tuan) {
+        this.tuan = tuan;
     }
 
     @Override

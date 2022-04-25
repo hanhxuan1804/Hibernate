@@ -251,7 +251,7 @@
               </hspacer>
             </children>
           </grid>
-          <grid id="642f7" binding="panelcard2" layout-manager="BorderLayout" hgap="0" vgap="0">
+          <grid id="642f7" binding="panelCard2" layout-manager="BorderLayout" hgap="0" vgap="0">
             <constraints>
               <card name="Card2"/>
             </constraints>
@@ -478,6 +478,67 @@
                       <text value="Thêm"/>
                     </properties>
                   </component>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="c7b92" binding="panelCard3" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints>
+              <card name="Card3"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="82f44" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+                <constraints border-constraint="North"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="f2c24" class="javax.swing.JLabel">
+                    <constraints/>
+                    <properties>
+                      <text value="Môn học: "/>
+                    </properties>
+                  </component>
+                  <component id="35b9d" class="javax.swing.JComboBox" binding="comboMHDiemDanh">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </grid>
+              <grid id="ad24" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+                <constraints border-constraint="South"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="49336" class="javax.swing.JButton" binding="lưuButton" default-binding="true">
+                    <constraints/>
+                    <properties>
+                      <text value="Lưu"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="87f10" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="Center"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="93651" class="javax.swing.JList" binding="listLinkToTable">
+                    <constraints border-constraint="West"/>
+                    <properties/>
+                  </component>
+                  <scrollpane id="c4ef3">
+                    <constraints border-constraint="Center"/>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="436c5" class="javax.swing.JTable" binding="tableDiemDanh">
+                        <constraints/>
+                        <properties/>
+                      </component>
+                    </children>
+                  </scrollpane>
                 </children>
               </grid>
             </children>
