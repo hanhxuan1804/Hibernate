@@ -39,17 +39,21 @@ public class LoginWindow {
                      ) {
                     if (Objects.equals(user.getUsername(), usernameField.getText())
                         && Objects.equals(user.getPassword(), hashPassword(passwordField.getPassword()))){
-
+                        trueLogin = true;
                         //TODO: kiểm tra học sinh hay giáo vụ
                         // Nếu học sinh đăng nhập lần đầu thì phải đổi mật khẩu
-                        if(user.getType() ==1){
-                            trueLogin = true;
+                        if(user.getType() == -1){
                             MainApp mainApp = new MainApp(userList.size());
                             mainApp.run();
                             frame.dispose();
                         }
+                        else if(user.getType() == 1){
+                            StudentMainWindow stu = new StudentMainWindow(user.getUsername());
+                            stu.run();
+                            frame.dispose();
+                        }
                         else{
-
+                            //run change passwword
                         }
                     }
                 }
@@ -65,7 +69,9 @@ public class LoginWindow {
     }
 
     public static void main(String[] args) {
-        MainApp.getInstance().run();
+        StudentMainWindow stu = new StudentMainWindow("19120218");
+        stu.run();
+
 //        frame = new JFrame("Login");
 //        frame.setContentPane((new LoginWindow()).mainPanel);
 //        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

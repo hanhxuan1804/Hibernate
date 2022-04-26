@@ -84,6 +84,7 @@ public class AddTimeTable extends JFrame {
                 dispose();
             }
         });
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);

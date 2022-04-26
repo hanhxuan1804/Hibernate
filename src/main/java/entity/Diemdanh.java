@@ -4,6 +4,8 @@ import javax.persistence.*;
 
 @Entity
 @NamedQuery(name ="ListDDofMH", query = "SELECT d FROM Diemdanh d , Thoikhoabieu t where d.maThoiKhoaBieu = t.maThoiKhoaBieu and t.monHoc = ?1")
+@NamedQuery(name ="ListTuanOfSVMH", query = "SELECT d.tuan FROM Diemdanh d , Thoikhoabieu t where d.maThoiKhoaBieu = t.maThoiKhoaBieu and t.monHoc = ?1 and d.maSinhVien=?2")
+@NamedQuery(name ="CheckExistDiemDanh", query = "SELECT COUNT(d) FROM Diemdanh d  where d.maThoiKhoaBieu = ?1 and d.maSinhVien = ?2 and d.tuan=?3")
 public class Diemdanh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

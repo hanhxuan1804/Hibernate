@@ -466,7 +466,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="2436b" class="javax.swing.JButton" binding="xemDanhSáchButton" default-binding="true">
+                  <component id="2436b" class="javax.swing.JButton" binding="xemDanhSachButton">
                     <constraints/>
                     <properties>
                       <text value="Xem danh sách"/>
@@ -511,7 +511,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="49336" class="javax.swing.JButton" binding="lưuButton" default-binding="true">
+                  <component id="49336" class="javax.swing.JButton" binding="luuButton">
                     <constraints/>
                     <properties>
                       <text value="Lưu"/>
@@ -526,11 +526,15 @@
                 <children>
                   <component id="93651" class="javax.swing.JList" binding="listLinkToTable">
                     <constraints border-constraint="West"/>
-                    <properties/>
+                    <properties>
+                      <background color="-5323323"/>
+                    </properties>
                   </component>
                   <scrollpane id="c4ef3">
                     <constraints border-constraint="Center"/>
-                    <properties/>
+                    <properties>
+                      <opaque value="true"/>
+                    </properties>
                     <border type="none"/>
                     <children>
                       <component id="436c5" class="javax.swing.JTable" binding="tableDiemDanh">

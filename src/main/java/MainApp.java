@@ -45,7 +45,7 @@ public class MainApp implements Observer {
     private JTextField textFieldEmail;
     private JFormattedTextField textFieldNgaySinh;
     private JButton btnThemSVMH;
-    private JButton xemDanhSáchButton;
+    private JButton xemDanhSachButton;
     private JTextArea labelThongBao;
     private JButton exportTemplateButton;
     private JButton importFromTemplateButton;
@@ -53,7 +53,7 @@ public class MainApp implements Observer {
     private JPanel panelCard3;
     private JTable tableDiemDanh;
     private JComboBox comboMHDiemDanh;
-    private JButton lưuButton;
+    private JButton luuButton;
     private JList listLinkToTable;
 
 
@@ -73,7 +73,6 @@ public class MainApp implements Observer {
 
     @Override
     public void update(Observable o, Object data) {
-
         thoikhoabieu = ((Thoikhoabieu)data);
         listModel.addElement(thoikhoabieu);
         listThoiKhoaBieu.setModel(listModel);
@@ -191,7 +190,7 @@ public class MainApp implements Observer {
                 listSVFromCSV.updateUI();
             }
         });
-        xemDanhSáchButton.addActionListener(new ActionListener() {
+        xemDanhSachButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LoadingWindow l= new LoadingWindow();
@@ -213,77 +212,87 @@ public class MainApp implements Observer {
                 initCardLayoutXDD();
             }
         });
-    }
+        luuButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LoadingWindow l = new LoadingWindow();
+                l.start();
+                executorService.submit(()->{
+                    EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+                    EntityManager entityManager = entityManagerFactory.createEntityManager();
+                    EntityTransaction entityTransaction = entityManager.getTransaction();
+                    lock.writeLock().lock();
 
-    private void initCardLayoutXDD() {
-        executorService.submit(() ->{
-            DefaultTableModel model = new DefaultTableModel(new Object[]{"Tuần 1","Tuần 2","Tuần 3","Tuần 4","Tuần 5",
-                    "Tuần 6","Tuần 7","Tuần 8","Tuần 9","Tuần 10",
-                    "Tuần 11","Tuần 12","Tuần 13","Tuần 14","Tuần 15"},0){
-                @Override
-                public Class getColumnClass(int columnIndex) {
-                    return Boolean.class;
-                }
-            };
+                    try {
+                        entityTransaction.begin();
+                        String mmh = (String) comboMHDiemDanh.getSelectedItem();
+                        TypedQuery<String> getMSVofMH = entityManager.createNamedQuery("GetMSVofMH",String.class);
+                        getMSVofMH.setParameter(1,mmh);
+                        List<String> svmh = getMSVofMH.getResultList();
 
+                        for (int i = 0; i < svmh.size(); i++) {
+                            TypedQuery<Integer> typedQuery = entityManager.createNamedQuery("ListTuanOfSVMH",Integer.class);
+                            typedQuery.setParameter(1,mmh);
+                            typedQuery.setParameter(2,svmh.get(i));
+                            List<Integer> diemdanh = typedQuery.getResultList();
+                            for (int j = 0; j < 15; j++) {
+                                if (tableDiemDanh.getValueAt(i,j) != null) {
+                                    int tuan = j + 1;
+                                    if((Boolean) tableDiemDanh.getValueAt(i,j)){
+                                        if(!diemdanh.contains(tuan)){
+                                            Diemdanh d=new Diemdanh();
+                                            TypedQuery<Integer> stringTypedQuery = entityManager.createQuery("SELECT t.maThoiKhoaBieu FROM Thoikhoabieu t WHERE t.monHoc = ?1",Integer.class);
+                                            stringTypedQuery.setParameter(1,mmh);
+                                            int mtkb = stringTypedQuery.getSingleResult();
+                                            d.setMaThoiKhoaBieu(Math.toIntExact(mtkb));
+                                            d.setMaSinhVien(svmh.get(i));
+                                            d.setTuan(Math.toIntExact(tuan));
+                                            entityManager.persist(d);
+                                        }
+                                    }
+                                    else{
+                                        if(diemdanh.contains(tuan)){
+                                            TypedQuery<Integer> stringTypedQuery = entityManager.createQuery("SELECT t.maThoiKhoaBieu FROM Thoikhoabieu t WHERE t.monHoc = ?1",Integer.class);
+                                            stringTypedQuery.setParameter(1,mmh);
+                                            int mtkb = stringTypedQuery.getSingleResult();
+                                            Query deleteQuery =entityManager.createQuery("DELETE from Diemdanh d where d.maThoiKhoaBieu = ?1 and d.maSinhVien =?2 and d.tuan =?3");
+                                            deleteQuery.setParameter(1,mtkb);
+                                            deleteQuery.setParameter(2,svmh.get(i));
+                                            deleteQuery.setParameter(3,tuan);
+                                            deleteQuery.executeUpdate();
+                                        }
 
-            EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
-            EntityManager entityManager = entityManagerFactory.createEntityManager();
-            EntityTransaction entityTransaction = entityManager.getTransaction();
-            lock.readLock().lock();
+                                    }
+                                }
 
-            try {
-                entityTransaction.begin();
-                TypedQuery<String> getMSVofMH = entityManager.createNamedQuery("GetMSVofMH",String.class);
-                getMSVofMH.setParameter(1,(String) comboMHDiemDanh.getSelectedItem());
-                List<String> svmh = getMSVofMH.getResultList();
-
-                TypedQuery<Diemdanh> typedQuery = entityManager.createNamedQuery("ListDDofMH",Diemdanh.class);
-                typedQuery.setParameter(1,(String) comboMHDiemDanh.getSelectedItem());
-                List<Diemdanh> diemdanh = typedQuery.getResultList();
-                Object[][] data = new Object[svmh.size()][15];
-                for (int i = 0; i < svmh.size(); i++) {
-                    for (Diemdanh value : diemdanh) {
-                        if (Objects.equals(value.getMaSinhVien(), svmh.get(i))) {
-                            data[i][value.getTuan()-1] = new Boolean(true);
-
+                            }
                         }
+                        entityTransaction.commit();
                     }
-                    model.addRow(data[i]);
-                }
-                DefaultListModel<String> lmd= new DefaultListModel<>();
-                lmd.addElement("-MSSV-");
-                for (String s:svmh
-                     ) {
-                    lmd.addElement(s);
-                }
-                SwingUtilities.invokeAndWait(()->{
-                    listLinkToTable.setModel(lmd);
-                    tableDiemDanh.setModel(model);
-                    listLinkToTable.setFixedCellHeight(20);
-                    tableDiemDanh.setRowHeight(20);
+                    catch (Exception ex)
+                    {
+                        System.out.println(ex.getMessage());
+                    }
+                    finally
+                    {
+                        if (entityTransaction.isActive()) {
+                            entityTransaction.rollback();
+                        }
+                        entityManager.close();
+                        entityManagerFactory.close();
+                        lock.writeLock().unlock();
+                        JOptionPane.showMessageDialog(panelCard1,
+                                "Done: Update successful!",
+                                "Updating...",JOptionPane.INFORMATION_MESSAGE);
 
-                    tableDiemDanh.updateUI();
-                    listLinkToTable.updateUI();
+                    }
                 });
-                entityTransaction.commit();
-            }
-            catch (Exception ex)
-            {
-                System.out.println(ex.getMessage());
-            }
-            finally
-            {
-                if (entityTransaction.isActive()) {
-                    entityTransaction.rollback();
-                }
-                entityManager.close();
-                entityManagerFactory.close();
-                lock.readLock().unlock();
+                l.close();
             }
         });
-
     }
+
+
 
     private void addByCSV() {
         LoadingWindow l = new LoadingWindow();
@@ -531,6 +540,11 @@ public class MainApp implements Observer {
         listThoiKhoaBieu.updateUI();
     }
 
+    private void createUIComponents() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        textFieldNgaySinh = new JFormattedTextField(dateFormat);
+    }
+
     private void initCardLayoutAddSubject(){
         btnThêmTKB.addActionListener(new ActionListener() {
             @Override
@@ -601,11 +615,6 @@ public class MainApp implements Observer {
                 updateJListTKB();
             }
         });
-    }
-
-    private void createUIComponents() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        textFieldNgaySinh = new JFormattedTextField(dateFormat);
     }
 
     private void initCardlayoutQLHS(){
@@ -684,6 +693,75 @@ public class MainApp implements Observer {
             e.printStackTrace();
         }
 
+
+    }
+
+    private void initCardLayoutXDD() {
+        executorService.submit(() ->{
+            DefaultTableModel model = new DefaultTableModel(new Object[]{"Tuần 1","Tuần 2","Tuần 3","Tuần 4","Tuần 5",
+                    "Tuần 6","Tuần 7","Tuần 8","Tuần 9","Tuần 10",
+                    "Tuần 11","Tuần 12","Tuần 13","Tuần 14","Tuần 15"},0){
+                @Override
+                public Class getColumnClass(int columnIndex) {
+                    return Boolean.class;
+                }
+            };
+
+
+            EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            EntityTransaction entityTransaction = entityManager.getTransaction();
+            lock.readLock().lock();
+
+            try {
+                entityTransaction.begin();
+                TypedQuery<String> getMSVofMH = entityManager.createNamedQuery("GetMSVofMH",String.class);
+                getMSVofMH.setParameter(1,(String) comboMHDiemDanh.getSelectedItem());
+                List<String> svmh = getMSVofMH.getResultList();
+
+                TypedQuery<Diemdanh> typedQuery = entityManager.createNamedQuery("ListDDofMH",Diemdanh.class);
+                typedQuery.setParameter(1,(String) comboMHDiemDanh.getSelectedItem());
+                List<Diemdanh> diemdanh = typedQuery.getResultList();
+                Object[][] data = new Object[svmh.size()][15];
+                for (int i = 0; i < svmh.size(); i++) {
+                    for (Diemdanh value : diemdanh) {
+                        if (Objects.equals(value.getMaSinhVien(), svmh.get(i))) {
+                            data[i][value.getTuan()-1] = new Boolean(true);
+                        }
+                    }
+                    model.addRow(data[i]);
+                }
+                DefaultListModel<String> lmd= new DefaultListModel<>();
+                lmd.addElement("-MSSV-");
+                for (String s:svmh
+                ) {
+                    lmd.addElement(s);
+                }
+                SwingUtilities.invokeAndWait(()->{
+                    listLinkToTable.setModel(lmd);
+                    tableDiemDanh.setModel(model);
+                    listLinkToTable.setFixedCellHeight(20);
+                    tableDiemDanh.setRowHeight(20);
+
+                    tableDiemDanh.updateUI();
+                    listLinkToTable.updateUI();
+                });
+                entityTransaction.commit();
+            }
+            catch (Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+            finally
+            {
+                if (entityTransaction.isActive()) {
+                    entityTransaction.rollback();
+                }
+                entityManager.close();
+                entityManagerFactory.close();
+                lock.readLock().unlock();
+            }
+        });
 
     }
 

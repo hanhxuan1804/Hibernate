@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.Time;
 
 @Entity
+@NamedQuery(name ="GetTKBByMaMonHoc", query = "SELECT u FROM Thoikhoabieu u where u.monHoc= ?1")
 public class Thoikhoabieu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

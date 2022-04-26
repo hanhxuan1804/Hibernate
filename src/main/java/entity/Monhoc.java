@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @NamedQuery(name ="ListMonHoc", query = "SELECT u FROM Monhoc u")
+@NamedQuery(name ="GetMonHocByMaMonHoc", query = "SELECT u FROM Monhoc u where u.maMonHoc= ?1")
 public class Monhoc {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
