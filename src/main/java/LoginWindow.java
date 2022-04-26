@@ -8,13 +8,8 @@ import java.awt.event.ActionListener;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 
 public class LoginWindow {
@@ -22,26 +17,24 @@ public class LoginWindow {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
+    private JButton changePasswordButton;
     private static JFrame frame;
 
     private List<User> userList;
 
     public LoginWindow(){
-        userList = loadUser();
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LoadingWindow l = new LoadingWindow();
                 l.start();
-
+                userList = loadUser();
                 boolean trueLogin = false;
                 for (User user:userList
                      ) {
                     if (Objects.equals(user.getUsername(), usernameField.getText())
                         && Objects.equals(user.getPassword(), hashPassword(passwordField.getPassword()))){
                         trueLogin = true;
-                        //TODO: kiểm tra học sinh hay giáo vụ
-                        // Nếu học sinh đăng nhập lần đầu thì phải đổi mật khẩu
                         if(user.getType() == -1){
                             MainApp mainApp = new MainApp(userList.size());
                             mainApp.run();
@@ -53,7 +46,11 @@ public class LoginWindow {
                             frame.dispose();
                         }
                         else{
-                            //run change passwword
+                            StudentMainWindow stu = new StudentMainWindow(user.getUsername());
+                            stu.run();
+                            ChangePasswordWindow changePasswordWindow = new ChangePasswordWindow(user.getUsername());
+                            changePasswordWindow.run();
+                            frame.dispose();
                         }
                     }
                 }
@@ -66,19 +63,23 @@ public class LoginWindow {
 
             }
         });
+        changePasswordButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ChangePasswordWindow changePasswordWindow = new ChangePasswordWindow(usernameField.getText());
+                changePasswordWindow.run();
+            }
+        });
     }
 
     public static void main(String[] args) {
-        StudentMainWindow stu = new StudentMainWindow("19120218");
-        stu.run();
-
-//        frame = new JFrame("Login");
-//        frame.setContentPane((new LoginWindow()).mainPanel);
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.setResizable(false);
-//        frame.pack();
-//        frame.setLocationRelativeTo(null);
-//        frame.setVisible(true);
+        frame = new JFrame("Login");
+        frame.setContentPane((new LoginWindow()).mainPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public static String hashPassword(char[] password){
